@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { rimraf } from 'rimraf';
 import { SaveFile } from './save-file.use-case';
 
 describe('SaveFile (use-case)', () => {
@@ -8,26 +9,23 @@ describe('SaveFile (use-case)', () => {
     fileName: 'custom-table-name',
   };
 
-  afterEach(() => {
-    // console.log(`${customOptions.fileDestination.split('/')[0]}`);
+  afterAll(() => {
     // Clean up after each test
     const customOutputsBaseDir = customOptions.fileDestination.split('/')[0];
-    setTimeout(() => {
-      const outputsFolderExists = fs.existsSync('outputs');
-      if (outputsFolderExists) {
-        fs.rmSync(`outputs`, { recursive: true, force: true });
-      }
+    const outputsFolderExists = fs.existsSync('outputs');
+    if (outputsFolderExists) {
+      rimraf(`outputs`); // rimraf soluciona el problema de permisos para eliminar directorios
+      // fs.rmSync(`outputs`, { recursive: true, force: true });
+    }
 
-      const customOutputsFolderExists = fs.existsSync(
-        `${customOutputsBaseDir}`
-      );
-      if (customOutputsFolderExists) {
-        fs.rmSync(`${customOutputsBaseDir}`, {
-          recursive: true,
-          force: true,
-        });
-      }
-    }, 1);
+    const customOutputsFolderExists = fs.existsSync(customOutputsBaseDir);
+    if (customOutputsFolderExists) {
+      rimraf(customOutputsBaseDir); // rimraf soluciona el problema de permisos para eliminar directorios
+      // fs.rmSync(`${customOutputsBaseDir}`, {
+      //   recursive: true,
+      //   force: true,
+      // });
+    }
   });
 
   test('should save file with default values', () => {

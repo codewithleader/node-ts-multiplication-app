@@ -1,3 +1,12 @@
+SOLUCIÓN: Usar la librería "rimraf" para eliminar directorios ya que maneja los permisos.
+
+```typescript
+import { rimraf } from 'rimraf';
+rimraf(path);
+```
+
+<!-- ---------------------------------- -->
+
 Me estaba dando un error:
 
 ```shell
