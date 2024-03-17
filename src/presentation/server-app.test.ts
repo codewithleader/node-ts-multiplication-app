@@ -1,6 +1,8 @@
 import { CreateTable } from '../domain/use-cases/create-table.use-case';
 import { SaveFile } from '../domain/use-cases/save-file.use-case';
 import { ServerApp } from './server-app';
+import { rimraf } from 'rimraf';
+import fs from 'fs';
 
 describe('Tests in server-app.ts', () => {
   const options = {
@@ -10,6 +12,12 @@ describe('Tests in server-app.ts', () => {
     fileDestination: 'test-destination',
     fileName: 'test-filename',
   };
+
+  afterAll(() => {
+    if (fs.existsSync(options.fileDestination)) {
+      rimraf(options.fileDestination);
+    }
+  });
 
   test('should create ServerApp instance', () => {
     // Arrange
@@ -48,5 +56,35 @@ describe('Tests in server-app.ts', () => {
       fileDestination: options.fileDestination,
       fileName: options.fileName,
     });
+  });
+
+  test('should run with custom values mocked', () => {
+    // Arrange
+    const logMock = jest.fn();
+    const logErrorMock = jest.fn();
+    const createTableMock = jest.fn().mockReturnValue('1 x 2 = 2');
+    const saveFileMock = jest.fn().mockReturnValue(true);
+
+    console.log = logMock;
+    console.error = logErrorMock;
+    CreateTable.prototype.execute = createTableMock;
+    SaveFile.prototype.execute = saveFileMock;
+
+    // Act
+    ServerApp.run(options);
+
+    // Assert
+    expect(logMock).toHaveBeenCalledWith('Server running...');
+    expect(createTableMock).toHaveBeenCalledWith({
+      base: options.base,
+      limit: options.limit,
+    });
+    expect(saveFileMock).toHaveBeenCalledWith({
+      fileContent: '1 x 2 = 2',
+      fileDestination: options.fileDestination,
+      fileName: options.fileName,
+    });
+    expect(logMock).toHaveBeenCalledWith('File created!');
+    expect(logErrorMock).not.toHaveBeenCalled(); // No se llamó a la función de error
   });
 });
